@@ -4,8 +4,8 @@ extern crate postgres;
 
 use postgres::{Connection, SslMode};
 use postgres::types::ToSql;
-mod test;
-use test::*;
+mod test_data_model;
+use test_data_model::*;
 
 
 
