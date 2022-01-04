@@ -1,23 +1,10 @@
 #[macro_use]
 extern crate rocket;
-extern crate postgres;
 
-use postgres::{Connection, SslMode};
-use postgres::types::ToSql;
-mod test_data_model;
-use test_data_model::*;
+use test::*;
 
 
-
-
-
-
-
-
-
-
-
-
+mod test;
 
 #[launch]
 fn rocket() -> _ {
