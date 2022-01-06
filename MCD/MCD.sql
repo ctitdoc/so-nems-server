@@ -1,83 +1,80 @@
-
-CREATE TABLE produit (
-                produit_id INTEGER NOT NULL,
-                nom_produit VARCHAR NOT NULL,
-                CONSTRAINT id PRIMARY KEY (produit_id)
+create table member
+(
+    member_id       serial
+        constraint id
+            primary key,
+    prenom          varchar not null,
+    date_naissance  varchar not null,
+    adresse_mail    varchar not null,
+    confirmation_mp varchar not null,
+    adresse         varchar not null,
+    numero_tel      varchar not null,
+    nom             varchar not null,
+    mot_de_passe    varchar not null
 );
 
+alter table member
+    owner to itdoc;
 
-CREATE TABLE annonce (
-                annonce_id INTEGER NOT NULL,
-                date VARCHAR NOT NULL,
-                CONSTRAINT id PRIMARY KEY (annonce_id)
+create table commande
+(
+    commande_id  serial
+        constraint commande_pk
+            primary key,
+    quantite_cmd integer not null,
+    member_id    integer not null
+        constraint member_commande_fk
+            references member
 );
 
+alter table commande
+    owner to itdoc;
 
-CREATE TABLE annonce_prod (
-                annonce_id INTEGER NOT NULL,
-                produit_id INTEGER NOT NULL,
-                quantite_annonce VARCHAR NOT NULL
+create table produit
+(
+    produit_id  serial
+        constraint produit_id
+            primary key,
+    nom_produit varchar not null
 );
 
+alter table produit
+    owner to itdoc;
 
-CREATE TABLE member (
-                member_id INTEGER NOT NULL,
-                prenom VARCHAR NOT NULL,
-                date_naissance VARCHAR NOT NULL,
-                adresse_mail VARCHAR NOT NULL,
-                confirmation_mp VARCHAR NOT NULL,
-                adresse VARCHAR NOT NULL,
-                numero_tel VARCHAR NOT NULL,
-                nom VARCHAR NOT NULL,
-                CONSTRAINT id PRIMARY KEY (member_id)
+create table annonce
+(
+    annonce_id serial
+        constraint annonce_id
+            primary key,
+    date       varchar not null
 );
 
+alter table annonce
+    owner to itdoc;
 
-CREATE TABLE commande (
-                commande_id INTEGER NOT NULL,
-                quantit INTEGER NOT NULL,
-                member_id INTEGER NOT NULL,
-                CONSTRAINT commande_pk PRIMARY KEY (commande_id)
+create table cmd_prod
+(
+    produit_id  integer not null
+        constraint produit_cmd_prod_fk
+            references produit,
+    commande_id integer not null
+        constraint commande_cmd_prod_fk
+            references commande
 );
 
+alter table cmd_prod
+    owner to itdoc;
 
-CREATE TABLE cmd_prod (
-                produit_id INTEGER NOT NULL,
-                commande_id INTEGER NOT NULL
+create table annonce_prod
+(
+    annonce_id       integer not null
+        constraint annonce_annonce_prod_fk
+            references annonce,
+    produit_id       integer not null
+        constraint produit_annonce_prod_fk
+            references produit,
+    quantite_annonce varchar not null
 );
 
-
-ALTER TABLE annonce_prod ADD CONSTRAINT produit_annonce_prod_fk
-FOREIGN KEY (produit_id)
-REFERENCES produit (produit_id)
-ON DELETE NO ACTION
-ON UPDATE NO ACTION
-NOT DEFERRABLE;
-
-ALTER TABLE cmd_prod ADD CONSTRAINT produit_cmd_prod_fk
-FOREIGN KEY (produit_id)
-REFERENCES produit (produit_id)
-ON DELETE NO ACTION
-ON UPDATE NO ACTION
-NOT DEFERRABLE;
-
-ALTER TABLE annonce_prod ADD CONSTRAINT annonce_annonce_prod_fk
-FOREIGN KEY (annonce_id)
-REFERENCES annonce (annonce_id)
-ON DELETE NO ACTION
-ON UPDATE NO ACTION
-NOT DEFERRABLE;
-
-ALTER TABLE commande ADD CONSTRAINT member_commande_fk
-FOREIGN KEY (member_id)
-REFERENCES member (member_id)
-ON DELETE NO ACTION
-ON UPDATE NO ACTION
-NOT DEFERRABLE;
-
-ALTER TABLE cmd_prod ADD CONSTRAINT commande_cmd_prod_fk
-FOREIGN KEY (commande_id)
-REFERENCES commande (commande_id)
-ON DELETE NO ACTION
-ON UPDATE NO ACTION
-NOT DEFERRABLE;
+alter table annonce_prod
+    owner to itdoc;
