@@ -1,5 +1,6 @@
 
 use crate::test::test_data_model::cnx;
+use serde_json::json;
 
 struct Member {
     nom: String,
@@ -40,6 +41,7 @@ pub fn index() -> String {
 
     let stmt = conn.prepare("SELECT nom, prenom, date_naissance, numero_tel, adresse_mail, mot_de_passe, confirmation_mp, adresse FROM member").unwrap();
     let mut res = "".to_string();
+    let mut json_person;
     for row in stmt.query(&[]).unwrap() {
         let person = Member {
             nom: row.get(0),
@@ -56,9 +58,14 @@ pub fn index() -> String {
 
 
         res = format!("form : {}\n{}, {}, {}, {}, {}, {}, {}, {}",
-                      res,person.nom, person.prenom, person.date_naissance, person.numero_tel, person.adresse_mail, person.mot_de_passe, person.confirmation_mp, person.adresse)
+                      res,person.nom, person.prenom, person.date_naissance, person.numero_tel, person.adresse_mail, person.mot_de_passe, person.confirmation_mp, person.adresse);
+        json_person = json!(person);
     };
 
-    res
+    //res
+
+    //return person as a json Value
+
+    json_person.to_string()
 
 }
