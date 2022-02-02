@@ -1,7 +1,10 @@
 
 use crate::test::test_data_model::cnx;
 use serde_json::json;
+use serde::{Serialize, Deserialize};
 
+
+#[derive(Serialize, Deserialize, Debug)]
 struct Member {
     nom: String,
     prenom: String,
@@ -41,7 +44,8 @@ pub fn index() -> String {
 
     let stmt = conn.prepare("SELECT nom, prenom, date_naissance, numero_tel, adresse_mail, mot_de_passe, confirmation_mp, adresse FROM member").unwrap();
     let mut res = "".to_string();
-    let mut json_person;
+    let mut json_member_list = "{\n".to_string();
+
     for row in stmt.query(&[]).unwrap() {
         let person = Member {
             nom: row.get(0),
@@ -54,18 +58,28 @@ pub fn index() -> String {
             adresse: row.get(7),
 
         };
+        json_member_list = format!("{}{}\n", json_member_list, serde_json::to_string(&person).unwrap());
 
 
 
         res = format!("form : {}\n{}, {}, {}, {}, {}, {}, {}, {}",
                       res,person.nom, person.prenom, person.date_naissance, person.numero_tel, person.adresse_mail, person.mot_de_passe, person.confirmation_mp, person.adresse);
-        json_person = json!(person);
+
+        //serialized_user = format!("{} {} {} {} {} {} {} {}", person.nom, person.prenom, person.date_naissance, person.numero_tel, person.adresse_mail, person.mot_de_passe, person.confirmation_mp, person.adresse);
+
     };
+    json_member_list = format!("{}}}", json_member_list);
 
-    //res
 
-    //return person as a json Value
+//res
+    //return the member list as a json Value
 
-    json_person.to_string()
+    json_member_list
+
+
+
+
+
+
 
 }
