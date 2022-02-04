@@ -44,7 +44,8 @@ pub fn index() -> String {
 
     let stmt = conn.prepare("SELECT nom, prenom, date_naissance, numero_tel, adresse_mail, mot_de_passe, confirmation_mp, adresse FROM member").unwrap();
     let mut res = "".to_string();
-    let mut json_member_list = "{\n".to_string();
+    let mut json_member_list = "[\n".to_string();
+
 
     for row in stmt.query(&[]).unwrap() {
         let person = Member {
@@ -58,7 +59,8 @@ pub fn index() -> String {
             adresse: row.get(7),
 
         };
-        json_member_list = format!("{}{}\n", json_member_list, serde_json::to_string(&person).unwrap());
+        json_member_list = format!("{}{},", json_member_list, serde_json::to_string(&person).unwrap());
+
 
 
 
@@ -68,7 +70,16 @@ pub fn index() -> String {
         //serialized_user = format!("{} {} {} {} {} {} {} {}", person.nom, person.prenom, person.date_naissance, person.numero_tel, person.adresse_mail, person.mot_de_passe, person.confirmation_mp, person.adresse);
 
     };
-    json_member_list = format!("{}}}", json_member_list);
+    //<supprimer le dernier caractère de json_member_list qui est la virgule de trop >;
+
+
+    if json_member_list.as_str().chars().last() == Some(','){
+        json_member_list.pop();
+
+    }
+    json_member_list = format!("{}\n]", json_member_list);
+
+
 
 
 //res
