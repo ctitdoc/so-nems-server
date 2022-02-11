@@ -18,7 +18,7 @@ struct Member {
 }
 
 
-#[get("/member")]
+#[get("/api/member")]
 pub fn index() -> String {
     let conn = cnx().unwrap();
 
