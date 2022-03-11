@@ -26,7 +26,7 @@ struct Produit {
 }
 
 
-#[get("/produit")]
+#[get("/api/produit")]
 pub fn produit() -> String {
     let conn = cnx().unwrap();
 
@@ -78,7 +78,7 @@ struct Annonce {
     date :String,
 }
 
-#[get("/annonce")]
+#[get("/api/annonce")]
 pub fn annonce() -> String {
     let conn = cnx().unwrap();
 
@@ -129,7 +129,7 @@ struct Cmd_prod{
     commande_id: i32,
 }
 
-#[get("/cmd_prod")]
+#[get("/api/cmd_prod")]
 pub fn cmd_prod() -> String {
     let conn = cnx().unwrap();
 
@@ -178,7 +178,7 @@ struct Annonce_prod{
     quantite_annonce: String
 }
 
-#[get("/annonce_prod")]
+#[get("/api/annonce_prod")]
 pub fn annonce_prod() -> String {
     let conn = cnx().unwrap();
 
@@ -228,7 +228,7 @@ struct Commande {
     member_id: i32,
 }
 
-#[get("/commande")]
+#[get("/api/commande")]
 pub fn commande() -> String {
     let conn = cnx().unwrap();
 
