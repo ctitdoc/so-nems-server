@@ -25,15 +25,14 @@ struct Produit {
     nom_produit: String,
 }
 
-
-#[get("/api/produit")]
-pub fn produit() -> String {
+#[get("/api/new_produit")]
+pub fn new_produit()-> String{
     let conn = cnx().unwrap();
 
 
 
     let me = Produit {
-        nom_produit : "nems porc".to_string(),
+        nom_produit : "paté impérial".to_string(),
 
 
 
@@ -41,9 +40,13 @@ pub fn produit() -> String {
     conn.execute("INSERT INTO produit (nom_produit)\
     VALUES ($1)",
                  &[&me.nom_produit]).unwrap();
+    serde_json::to_string("ok").unwrap()
 
 
-
+}
+#[get("/api/produit")]
+pub fn produit() -> String {
+    let conn = cnx().unwrap();
 
     let stmt = conn.prepare("SELECT nom_produit FROM produit").unwrap();
     let mut res = "".to_string();
@@ -73,6 +76,8 @@ pub fn produit() -> String {
 
 
 }
+
+
 #[derive(Serialize, Deserialize, Debug)]
 struct Annonce {
     date :String,

@@ -8,5 +8,5 @@ mod test;
 
 #[launch]
 fn rocket() -> _ {
-    rocket::build().mount("/", routes![index,produit, commande, annonce, cmd_prod, annonce_prod])//
+    rocket::build().mount("/", routes![index,produit,new_produit, commande, annonce, cmd_prod, annonce_prod])//
 }
