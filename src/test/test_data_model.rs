@@ -25,14 +25,14 @@ struct Produit {
     nom_produit: String,
 }
 
-#[get("/api/new_produit")]
-pub fn new_produit()-> String{
+#[get("/api/new_produit/<name>")]
+pub fn new_produit(name:&str)-> String{
     let conn = cnx().unwrap();
 
 
 
     let me = Produit {
-        nom_produit : "paté impérial".to_string(),
+        nom_produit : name.to_string(),
 
 
 
