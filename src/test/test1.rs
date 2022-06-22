@@ -78,19 +78,8 @@ pub fn index() -> String {
 
     }
     json_member_list = format!("{}\n]", json_member_list);
-
-
-
-
 //res
     //return the member list as a json Value
 
     json_member_list
-
-
-
-
-
-
-
 }

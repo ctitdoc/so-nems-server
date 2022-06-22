@@ -275,3 +275,80 @@ pub fn commande() -> String {
     //res
 
 }
+
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Subscribe {
+    nom: String,
+    prenom: String,
+    date_naissance: String,
+    numero_tel: String,
+    adresse_mail:String,
+    mot_de_passe: String,
+    confirmation_mp: String,
+    adresse : String,
+    ville : String,
+    code_postal : String,
+}
+
+
+#[get("/api/subscribe")]
+pub fn subscribe() -> String {
+    let conn = cnx().unwrap();
+
+
+    let sub = Subscribe {
+        nom: "Mayran".to_string(),
+        prenom: "Loïc".to_string(),
+        date_naissance: "2009-11-31".to_string(),
+        numero_tel: "06.09.88.76.44".to_string(),
+        adresse_mail: "boubou@bubu.fr".to_string(),
+        mot_de_passe: "*********".to_string(),
+        confirmation_mp: "**********".to_string(),
+        adresse: "5 rue jean".to_string(),
+        ville: "Crolles".to_string(),
+        code_postal: "38920".to_string(),
+    };
+    conn.execute("INSERT INTO subscribe (nom, prenom, date_naissance, numero_tel, adresse_mail, mot_de_passe, confirmation_mp, adresse, ville, code_postal)\
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
+                 &[&sub.nom, &sub.prenom, &sub.date_naissance, &sub.numero_tel, &sub.adresse_mail, &sub.mot_de_passe, &sub.confirmation_mp, &sub.adresse, &sub.ville, &sub.code_postal]).unwrap();
+
+
+    let stmt = conn.prepare("SELECT nom, prenom, date_naissance, numero_tel, adresse_mail, mot_de_passe, confirmation_mp, adresse, ville, codePostal FROM subscribe").unwrap();
+    let mut res = "".to_string();
+    let mut json_member_list = "[\n".to_string();
+
+
+    for row in stmt.query(&[]).unwrap() {
+        let person = Subscribe {
+            nom: row.get(0),
+            prenom: row.get(1),
+            date_naissance: row.get(2),
+            numero_tel: row.get(3),
+            adresse_mail: row.get(4),
+            mot_de_passe: row.get(5),
+            confirmation_mp: row.get(6),
+            adresse: row.get(7),
+            ville: row.get(8),
+            code_postal: row.get(9),
+        };
+        json_member_list = format!("{}{},", json_member_list, serde_json::to_string(&person).unwrap());
+
+
+        res = format!("form : {}\n{}, {}, {}, {}, {}, {}, {}, {}, {}, {}",
+                      res, person.nom, person.prenom, person.date_naissance, person.numero_tel, person.adresse_mail, person.mot_de_passe, person.confirmation_mp, person.adresse, person.ville, person.code_postal);
+
+        //serialized_user = format!("{} {} {} {} {} {} {} {}", person.nom, person.prenom, person.date_naissance, person.numero_tel, person.adresse_mail, person.mot_de_passe, person.confirmation_mp, person.adresse);
+    };
+    //<supprimer le dernier caractère de json_member_list qui est la virgule de trop >;
+
+
+    if json_member_list.as_str().chars().last() == Some(',') {
+        json_member_list.pop();
+    }
+    json_member_list = format!("{}\n]", json_member_list);
+//res
+    //return the member list as a json Value
+
+    json_member_list
+}
