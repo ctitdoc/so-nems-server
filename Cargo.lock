@@ -347,7 +347,7 @@ checksum = "c1d9279ca822891c1a4dae06d185612cf8fc6acfe5dff37781b41297811b12ee"
 dependencies = [
  "cc",
  "libc",
- "log 0.4.14",
+ "log 0.4.17",
  "rustversion",
  "winapi",
 ]
@@ -526,14 +526,14 @@ version = "0.3.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e19e8d5c34a3e0e2223db8e060f9e8264aeeb5c5fc64a4ee9965c062211c024b"
 dependencies = [
- "log 0.4.14",
+ "log 0.4.17",
 ]
 
 [[package]]
 name = "log"
-version = "0.4.14"
+version = "0.4.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "51b9bbe6c47d51fc3e1a9b945965946b4c44142ab8792c50835a980d362c2710"
+checksum = "abb12e687cfb44aa40f41fc3978ef76448f9b6038cad6aef4259d3c095a2382e"
 dependencies = [
  "cfg-if",
 ]
@@ -581,7 +581,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8067b404fe97c70829f082dec8bcf4f71225d7eaea1d8645349cb76fa06205cc"
 dependencies = [
  "libc",
- "log 0.4.14",
+ "log 0.4.17",
  "miow",
  "ntapi",
  "winapi",
@@ -607,7 +607,7 @@ dependencies = [
  "futures-util",
  "http",
  "httparse",
- "log 0.4.14",
+ "log 0.4.17",
  "memchr",
  "mime",
  "spin",
@@ -1036,7 +1036,7 @@ dependencies = [
  "figment",
  "futures",
  "indexmap",
- "log 0.4.14",
+ "log 0.4.17",
  "memchr",
  "multer",
  "num_cpus",
@@ -1085,7 +1085,7 @@ dependencies = [
  "http",
  "hyper",
  "indexmap",
- "log 0.4.14",
+ "log 0.4.17",
  "memchr",
  "mime",
  "parking_lot",
@@ -1242,6 +1242,7 @@ checksum = "f2dd574626839106c320a323308629dcb1acfc96e32a8cba364ddc61ac23ee83"
 name = "so-nems-server"
 version = "0.1.0"
 dependencies = [
+ "log 0.4.17",
  "postgres",
  "rocket",
  "serde",
@@ -1461,7 +1462,7 @@ dependencies = [
  "bytes",
  "futures-core",
  "futures-sink",
- "log 0.4.14",
+ "log 0.4.17",
  "pin-project-lite",
  "tokio",
 ]
@@ -1520,7 +1521,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a6923477a48e41c1951f1999ef8bb5a3023eb723ceadafe78ffb65dc366761e3"
 dependencies = [
  "lazy_static",
- "log 0.4.14",
+ "log 0.4.17",
  "tracing-core",
 ]
 
@@ -1585,7 +1586,7 @@ version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1ce8a968cb1cd110d136ff8b819a556d6fb6d919363c61534f6860c7eb172ba0"
 dependencies = [
- "log 0.4.14",
+ "log 0.4.17",
  "try-lock",
 ]
 
@@ -1613,7 +1614,7 @@ checksum = "8b21c0df030f5a177f3cba22e9bc4322695ec43e7257d865302900290bcdedca"
 dependencies = [
  "bumpalo",
  "lazy_static",
- "log 0.4.14",
+ "log 0.4.17",
  "proc-macro2",
  "quote",
  "syn",
