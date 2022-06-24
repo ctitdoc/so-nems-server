@@ -5,12 +5,8 @@ use postgres::{Connection, SslMode};
 use postgres::types::ToSql;
 use serde_json::json;
 use serde::{Serialize, Deserialize};
-
-
-
-
-
-
+use rocket::form::Form;
+use log::{info, warn};
 
 
 pub fn cnx() -> Result<Connection, ::postgres::error::ConnectError> {
@@ -23,45 +19,50 @@ pub fn cnx() -> Result<Connection, ::postgres::error::ConnectError> {
 #[derive(Serialize, Deserialize, Debug)]
 struct Produit {
     nom_produit: String,
+    ingredients: String,
+    prix: f64,
 }
 
-#[get("/api/new_produit/<name>")]
-pub fn new_produit(name:&str)-> String{
+#[post("/api/new_produit", data="<json>")]
+pub fn new_produit(json : String)-> String {
     let conn = cnx().unwrap();
 
+    info!("json............: {}", json.as_str());
+    let me : Produit = serde_json::from_str(json.as_str()).unwrap();
 
-
-    let me = Produit {
-        nom_produit : name.to_string(),
-
-
-
-    };
-    conn.execute("INSERT INTO produit (nom_produit)\
-    VALUES ($1)",
-                 &[&me.nom_produit]).unwrap();
+    conn.execute("INSERT INTO produit (nom_produit,ingredients, prix)\
+    VALUES ($1,$2,$3)",
+                 &[
+                     &me.nom_produit,
+                     &me.ingredients,
+                     &me.prix
+                 ]).unwrap();
     serde_json::to_string("ok").unwrap()
 
 
 }
+
+
 #[get("/api/produit")]
 pub fn produit() -> String {
     let conn = cnx().unwrap();
 
-    let stmt = conn.prepare("SELECT nom_produit FROM produit").unwrap();
+    let stmt = conn.prepare("SELECT nom_produit, ingredients, prix FROM produit where prix is not null ORDER BY produit_id").unwrap();
     let mut res = "".to_string();
     let mut json_prod_list = "[\n".to_string();
     for row in stmt.query(&[]).unwrap() {
         let prod = Produit {
-            nom_produit: row.get(0)
+            nom_produit: row.get(0),
+            ingredients:row.get(1),
+            prix:row.get(2),
 
         };
-        json_prod_list = format!("{}{},", json_prod_list, serde_json::to_string(&prod ).unwrap());
+
+        json_prod_list = format!("{}{},", json_prod_list, serde_json::to_string(&prod).unwrap());
 
 
-
-        res = format!("form : {}\n{}",
-                      res, prod.nom_produit)
+        res = format!("form : {},{},{}\n{}",
+                      res, prod.nom_produit, prod.ingredients, prod.prix)
     };
     if json_prod_list.as_str().chars().last() == Some(','){
         json_prod_list.pop();
