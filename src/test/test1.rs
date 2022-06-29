@@ -1,4 +1,3 @@
-
 use crate::test::test_data_model::cnx;
 use serde_json::json;
 use serde::{Serialize, Deserialize};
@@ -78,8 +77,19 @@ pub fn index() -> String {
 
     }
     json_member_list = format!("{}\n]", json_member_list);
+
+
+
+
 //res
     //return the member list as a json Value
 
     json_member_list
+
+
+
+
+
+
+
 }
