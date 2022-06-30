@@ -1,7 +1,7 @@
 create table subscribe
 (
     subscribe_id       serial
-        constraint id
+        constraint subscribe_id_primary_key_constraint
             primary key,
     prenom          varchar not null,
     date_naissance  varchar not null,
