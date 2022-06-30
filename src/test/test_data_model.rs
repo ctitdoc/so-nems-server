@@ -283,7 +283,7 @@ pub fn commande() -> String {
 
 
 #[derive(Serialize, Deserialize, Debug)]
-struct Subscribe {
+struct Member {
     nom: String,
     prenom: String,
     date_naissance: String,
@@ -294,14 +294,14 @@ struct Subscribe {
     adresse : String
 }
 
-#[post("/api/new_subscribe", data="<json>")]
-pub fn new_subscribe(json : String)-> String {
+#[post("/api/new_member", data="<json>")]
+pub fn new_member(json : String)-> String {
     let conn = cnx().unwrap();
 
     info!("json............: {}", json.as_str());
-    let me : Subscribe = serde_json::from_str(json.as_str()).unwrap();
+    let me : Member = serde_json::from_str(json.as_str()).unwrap();
 
-    conn.execute("INSERT INTO subscribe (nom,prenom, date_naissance,numero_tel,adresse_mail,mot_de_passe,confirmation_mp,adresse)\
+    conn.execute("INSERT INTO member (nom,prenom, date_naissance,numero_tel,adresse_mail,mot_de_passe,confirmation_mp,adresse)\
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8)",
                  &[
                      &me.nom,
@@ -316,12 +316,12 @@ pub fn new_subscribe(json : String)-> String {
     serde_json::to_string("ok").unwrap()
 }
 
-#[get("/api/subscribe")]
-pub fn subscribe() -> String {
+#[get("/api/member")]
+pub fn member() -> String {
     let conn = cnx().unwrap();
 
 
-    let sub = Subscribe {
+    let mem = Member {
         nom: "Mayran".to_string(),
         prenom: "Loïc".to_string(),
         date_naissance: "2009-11-31".to_string(),
@@ -331,18 +331,18 @@ pub fn subscribe() -> String {
         confirmation_mp: "**********".to_string(),
         adresse: "5 rue jean".to_string(),
     };
-    conn.execute("INSERT INTO subscribe (nom, prenom, date_naissance, numero_tel, adresse_mail, mot_de_passe, confirmation_mp, adresse)\
+    conn.execute("INSERT INTO member (nom, prenom, date_naissance, numero_tel, adresse_mail, mot_de_passe, confirmation_mp, adresse)\
     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
-                 &[&sub.nom, &sub.prenom, &sub.date_naissance, &sub.numero_tel, &sub.adresse_mail, &sub.mot_de_passe, &sub.confirmation_mp, &sub.adresse]).unwrap();
+                 &[&mem.nom, &mem.prenom, &mem.date_naissance, &mem.numero_tel, &mem.adresse_mail, &mem.mot_de_passe, &mem.confirmation_mp, &mem.adresse]).unwrap();
 
 
-    let stmt = conn.prepare("SELECT nom, prenom, date_naissance, numero_tel, adresse_mail, mot_de_passe, confirmation_mp, adresse FROM subscribe").unwrap();
+    let stmt = conn.prepare("SELECT nom, prenom, date_naissance, numero_tel, adresse_mail, mot_de_passe, confirmation_mp, adresse FROM member").unwrap();
     let mut res = "".to_string();
     let mut json_member_list = "[\n".to_string();
 
 
     for row in stmt.query(&[]).unwrap() {
-        let person = Subscribe {
+        let person = Member {
             nom: row.get(0),
             prenom: row.get(1),
             date_naissance: row.get(2),
