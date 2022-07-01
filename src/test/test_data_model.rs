@@ -320,22 +320,6 @@ pub fn new_member(json : String)-> String {
 pub fn member() -> String {
     let conn = cnx().unwrap();
 
-
-    let mem = Member {
-        nom: "Mayran".to_string(),
-        prenom: "Loïc".to_string(),
-        date_naissance: "2009-11-31".to_string(),
-        numero_tel: "06.09.88.76.44".to_string(),
-        adresse_mail: "boubou@bubu.fr".to_string(),
-        mot_de_passe: "*********".to_string(),
-        confirmation_mp: "**********".to_string(),
-        adresse: "5 rue jean".to_string(),
-    };
-    conn.execute("INSERT INTO member (nom, prenom, date_naissance, numero_tel, adresse_mail, mot_de_passe, confirmation_mp, adresse)\
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
-                 &[&mem.nom, &mem.prenom, &mem.date_naissance, &mem.numero_tel, &mem.adresse_mail, &mem.mot_de_passe, &mem.confirmation_mp, &mem.adresse]).unwrap();
-
-
     let stmt = conn.prepare("SELECT nom, prenom, date_naissance, numero_tel, adresse_mail, mot_de_passe, confirmation_mp, adresse FROM member").unwrap();
     let mut res = "".to_string();
     let mut json_member_list = "[\n".to_string();
