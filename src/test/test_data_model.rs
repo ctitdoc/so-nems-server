@@ -41,7 +41,6 @@ pub fn new_produit(json : String)-> String {
                  ]).unwrap();
     serde_json::to_string("ok").unwrap()
 
-
 }
 
 
@@ -281,4 +280,81 @@ pub fn commande() -> String {
 
     //res
 
+}
+
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Member {
+    nom: String,
+    prenom: String,
+    date_naissance: String,
+    numero_tel: String,
+    adresse_mail:String,
+    mot_de_passe: String,
+    confirmation_mp: String,
+    adresse : String
+}
+
+#[post("/api/new_member", data="<json>")]
+pub fn new_member(json : String)-> String {
+    let conn = cnx().unwrap();
+
+    info!("json............: {}", json.as_str());
+    let me : Member = serde_json::from_str(json.as_str()).unwrap();
+
+    conn.execute("INSERT INTO member (nom,prenom, date_naissance,numero_tel,adresse_mail,mot_de_passe,confirmation_mp,adresse)\
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8)",
+                 &[
+                     &me.nom,
+                     &me.prenom,
+                     &me.date_naissance,
+                     &me.numero_tel,
+                     &me.adresse_mail,
+                     &me.mot_de_passe,
+                     &me.confirmation_mp,
+                     &me.adresse
+                 ]).unwrap();
+    serde_json::to_string("ok").unwrap()
+}
+
+#[get("/api/member")]
+pub fn member() -> String {
+    let conn = cnx().unwrap();
+
+    let stmt = conn.prepare("SELECT nom, prenom, date_naissance, numero_tel, adresse_mail, mot_de_passe, confirmation_mp, adresse FROM member").unwrap();
+    let mut res = "".to_string();
+    let mut json_member_list = "[\n".to_string();
+
+
+    for row in stmt.query(&[]).unwrap() {
+        let person = Member {
+            nom: row.get(0),
+            prenom: row.get(1),
+            date_naissance: row.get(2),
+            numero_tel: row.get(3),
+            adresse_mail: row.get(4),
+            mot_de_passe: row.get(5),
+            confirmation_mp: row.get(6),
+            adresse: row.get(7),
+
+        };
+        json_member_list = format!("{}{},", json_member_list, serde_json::to_string(&person).unwrap());
+
+
+        res = format!("form : {}\n{}, {}, {}, {}, {}, {}, {}, {}",
+                      res, person.nom, person.prenom, person.date_naissance, person.numero_tel, person.adresse_mail, person.mot_de_passe, person.confirmation_mp, person.adresse);
+
+        //serialized_user = format!("{} {} {} {} {} {} {} {}", person.nom, person.prenom, person.date_naissance, person.numero_tel, person.adresse_mail, person.mot_de_passe, person.confirmation_mp, person.adresse);
+    };
+    //<supprimer le dernier caractère de json_member_list qui est la virgule de trop >;
+
+
+    if json_member_list.as_str().chars().last() == Some(',') {
+        json_member_list.pop();
+    }
+    json_member_list = format!("{}\n]", json_member_list);
+//res
+    //return the member list as a json Value
+
+    json_member_list
 }
