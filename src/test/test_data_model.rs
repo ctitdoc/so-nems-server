@@ -316,6 +316,42 @@ pub fn new_member(json : String)-> String {
     serde_json::to_string("ok").unwrap()
 }
 
+#[get("/api/login_member")]
+pub fn login_member() -> String {
+    let conn = cnx().unwrap();
+
+    //TODO : Est ce que l'on récupère seulement les 2 éléments voulu (adresse_mail et motdepasse) ou sinon on récupère tout (Obligatoire ou nécessaire pour plus tard) ?
+
+    //TODO : ajouter dans la requête SQL : WHERE adresse_mail = adress recu de so-nems (saisie par l'utilisateur)
+    //TODO : faire en suite une comparaison entre le mot de passe saisie et le mot de passe enregistré dans la BDD
+
+
+    //TODO : On renvoi toutes les données pour pouvoir les utiliser
+
+    let stmt = conn.prepare("SELECT adresse_mail, mot_de_passe FROM member WHERE adresse_mail = 'self.adress'").unwrap();
+    let mut res = "".to_string();
+
+    for row in stmt.query(&[]).unwrap() {
+        let person = Member {
+            nom: row.get(0),
+            prenom: row.get(1),
+            date_naissance: row.get(2),
+            numero_tel: row.get(3),
+            adresse_mail: row.get(4),
+            mot_de_passe: row.get(5),
+            confirmation_mp: row.get(6),
+            adresse: row.get(7),
+        };
+
+        res = format!("form : {}\n{}, {}",
+                      res, person.adresse_mail, person.mot_de_passe);
+
+    };
+
+    res
+}
+
+
 #[get("/api/member")]
 pub fn member() -> String {
     let conn = cnx().unwrap();
