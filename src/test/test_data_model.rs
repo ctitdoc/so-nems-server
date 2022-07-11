@@ -7,6 +7,7 @@ use serde_json::json;
 use serde::{Serialize, Deserialize};
 use rocket::form::Form;
 use log::{info, warn};
+use std::collections::HashMap;
 
 
 pub fn cnx() -> Result<Connection, ::postgres::error::ConnectError> {
@@ -18,6 +19,7 @@ pub fn cnx() -> Result<Connection, ::postgres::error::ConnectError> {
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Produit {
+    produit_id: i32,
     nom_produit: String,
     ingredients: String,
     prix: f64,
@@ -46,22 +48,23 @@ pub fn new_produit(json : String)-> String {
 pub fn produit() -> String {
     let conn = cnx().unwrap();
 
-    let stmt = conn.prepare("SELECT nom_produit, ingredients, prix FROM produit where prix is not null ORDER BY produit_id").unwrap();
+    let stmt = conn.prepare("SELECT produit_id, nom_produit, ingredients, prix FROM produit where prix is not null ORDER BY produit_id").unwrap();
     let mut res = "".to_string();
     let mut json_prod_list = "[\n".to_string();
     for row in stmt.query(&[]).unwrap() {
         let prod = Produit {
-            nom_produit: row.get(0),
-            ingredients:row.get(1),
-            prix:row.get(2),
+            produit_id:row.get(0),
+            nom_produit: row.get(1),
+            ingredients:row.get(2),
+            prix:row.get(3),
 
         };
 
         json_prod_list = format!("{}{},", json_prod_list, serde_json::to_string(&prod).unwrap());
 
 
-        res = format!("form : {},{},{}\n{}",
-                      res, prod.nom_produit, prod.ingredients, prod.prix)
+        res = format!("form : {} {},{},{}\n{}",
+                      res,prod.produit_id, prod.nom_produit, prod.ingredients, prod.prix)
     };
     if json_prod_list.as_str().chars().last() == Some(','){
         json_prod_list.pop();
@@ -231,28 +234,25 @@ pub fn annonce_prod() -> String {
 struct Commande {
     quantite_cmd: i32,
     member_id: i32,
+    items: HashMap<i32,i32>
 }
-
-#[get("/api/commande")]
-pub fn commande() -> String {
+#[post("/api/new_order", data="<json>")]
+pub fn new_order (json : String) -> String {
     let conn = cnx().unwrap();
 
+    info!("json............: {}", json.as_str());
+    let me : Commande = serde_json::from_str(json.as_str()).unwrap();
 
-
-    let me = Commande {
-        quantite_cmd : 20,
-        member_id: 1,
-
-
-
-
-    };
     conn.execute("INSERT INTO commande (quantite_cmd, member_id)\
     VALUES ($1, $2)",
                  &[&me.quantite_cmd, &me.member_id]).unwrap();
+    serde_json::to_string("ok").unwrap()
 
 
-    ///annonce de tournée de nems avec date et type de nems(porc,crevette, végé, poulet, nutella)
+}
+#[get("/api/commande")]
+pub fn commande() -> String {
+    let conn = cnx().unwrap();
 
     let stmt = conn.prepare("SELECT quantite_cmd, member_id FROM commande").unwrap();
     let mut res = "".to_string();
@@ -260,7 +260,8 @@ pub fn commande() -> String {
     for row in stmt.query(&[]).unwrap() {
         let cmd = Commande {
             quantite_cmd: row.get(0),
-            member_id: row.get(1)
+            member_id: row.get(1),
+            items: HashMap::new()
         };
 
         json_commande_list = format!("{}{},",json_commande_list,serde_json::to_string(&cmd).unwrap());
