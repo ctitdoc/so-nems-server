@@ -8,6 +8,8 @@ use serde::{Serialize, Deserialize};
 use rocket::form::Form;
 use log::{info, warn};
 use std::collections::HashMap;
+use self::postgres::Statement;
+use self::postgres::rows::Rows;
 
 
 pub fn cnx() -> Result<Connection, ::postgres::error::ConnectError> {
@@ -135,6 +137,7 @@ pub fn annonce() -> String {
 struct Cmd_prod{
     produit_id: i32,
     commande_id: i32,
+    quantity: i32,
 }
 
 #[get("/api/cmd_prod")]
@@ -144,22 +147,25 @@ pub fn cmd_prod() -> String {
 
     let me = Cmd_prod {
         produit_id: 1,
-        commande_id: 1
+        commande_id: 1,
+        quantity: 1,
+
     };
-    conn.execute("INSERT INTO cmd_prod (produit_id, commande_id)\
-    VALUES ($1, $2)",
-                 &[&me.produit_id, &me.commande_id]).unwrap();
+    conn.execute("INSERT INTO cmd_prod (produit_id, commande_id, quantity)\
+    VALUES ($1, $2, $3)",
+                 &[&me.produit_id, &me.commande_id, &me.quantity]).unwrap();
 
 
 
 
-    let stmt = conn.prepare("SELECT produit_id, commande_id FROM cmd_prod").unwrap();
+    let stmt = conn.prepare("SELECT produit_id, commande_id, quantity FROM cmd_prod").unwrap();
     let mut res = "".to_string();
     let mut json_cmd_prod_list = "[\n".to_string();
     for row in stmt.query(&[]).unwrap() {
         let cmp = Cmd_prod {
             produit_id: row.get(0),
             commande_id: row.get(1),
+            quantity:row.get(2),
 
         };
         json_cmd_prod_list = format!("{}{},", json_cmd_prod_list, serde_json::to_string(&cmp).unwrap());
@@ -232,45 +238,77 @@ pub fn annonce_prod() -> String {
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Commande {
+    commande_id: i32,
     quantite_cmd: i32,
     member_id: i32,
     items: HashMap<i32,i32>
 }
+
 #[post("/api/new_order", data="<json>")]
 pub fn new_order (json : String) -> String {
     let conn = cnx().unwrap();
 
     info!("json............: {}", json.as_str());
+
     let me : Commande = serde_json::from_str(json.as_str()).unwrap();
 
-    conn.execute("INSERT INTO commande (quantite_cmd, member_id)\
-    VALUES ($1, $2)",
-                 &[&me.quantite_cmd, &me.member_id]).unwrap();
+    for (key, value) in me.items.iter() {
+        info!("{}",format!("deserialized order item : {}, {}", key, value));
+    };
+
+    let stmt: Statement = conn.prepare(
+        "INSERT INTO commande (quantite_cmd, member_id)\
+        VALUES ($1, $2) RETURNING commande_id").unwrap();
+
+    let rows : Rows = stmt.query(&[&me.quantite_cmd, &me.member_id]).unwrap();
+    let commande_id: i32 = rows.get(0).get(0);
+
+    for (key, value) in me.items.iter() {
+        conn.execute("INSERT INTO cmd_prod (commande_id, produit_id, quantity)\
+    VALUES ($1, $2, $3)",
+                     &[&key, &commande_id, &value]).unwrap();
+    };
     serde_json::to_string("ok").unwrap()
 
-
 }
+
 #[get("/api/commande")]
 pub fn commande() -> String {
     let conn = cnx().unwrap();
 
-    let stmt = conn.prepare("SELECT quantite_cmd, member_id FROM commande").unwrap();
+    let stmt = conn.prepare("SELECT commande_id, quantite_cmd, member_id FROM commande").unwrap();
     let mut res = "".to_string();
     let mut json_commande_list = "[\n".to_string();
     for row in stmt.query(&[]).unwrap() {
-        let cmd = Commande {
-            quantite_cmd: row.get(0),
-            member_id: row.get(1),
+        let mut cmd = Commande {
+            member_id: row.get(2),
+            commande_id: row.get(0),
+            quantite_cmd: row.get(1),
             items: HashMap::new()
+
+
+        };
+        let stmt_cmd_prod= conn.prepare("SELECT produit_id,quantity FROM cmd_prod WHERE commande_id = $1").unwrap();
+        for row_cmd_prod in stmt_cmd_prod.query(&[&cmd.commande_id]).unwrap(){
+            Cmd_prod{
+                produit_id: row_cmd_prod.get(0),
+                quantity: row_cmd_prod.get(1),
+                commande_id: cmd.commande_id,
+
+            };
+            cmd.items.insert(row_cmd_prod.get(0), row_cmd_prod.get(1));
+
         };
 
-        json_commande_list = format!("{}{},",json_commande_list,serde_json::to_string(&cmd).unwrap());
+        let json_cmd = serde_json::to_string(&cmd).unwrap();
+        info!("json_cmd............: {}", json_cmd.as_str());
 
+        json_commande_list = format!("{}{},",json_commande_list,json_cmd);
 
-
-        res = format!("form : {}\n{}, {}",
-                      res,cmd.quantite_cmd, cmd.member_id)
     };
+
+
+
     if json_commande_list.as_str().chars().last() == Some(','){
         json_commande_list.pop();
     }
@@ -278,7 +316,7 @@ pub fn commande() -> String {
 
     json_commande_list
 
-    //res
+
 
 }
 
