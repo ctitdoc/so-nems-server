@@ -308,7 +308,6 @@ pub fn commande() -> String {
     };
 
 
-
     if json_commande_list.as_str().chars().last() == Some(','){
         json_commande_list.pop();
     }
