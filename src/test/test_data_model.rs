@@ -317,40 +317,6 @@ pub fn new_member(json : String)-> String {
     serde_json::to_string("ok").unwrap()
 }
 
-#[get("/api/login_member")]
-pub fn login_member() -> String {
-    let conn = cnx().unwrap();
-
-    //TODO : Est ce que l'on récupère seulement les 2 éléments voulu (adresse_mail et motdepasse) ou sinon on récupère tout (Obligatoire ou nécessaire pour plus tard) ?
-
-    //TODO : ajouter dans la requête SQL : WHERE adresse_mail = adress recu de so-nems (saisie par l'utilisateur)
-    //TODO : faire en suite une comparaison entre le mot de passe saisie et le mot de passe enregistré dans la BDD
-
-
-    //TODO : On renvoi toutes les données pour pouvoir les utiliser
-
-    let stmt = conn.prepare("SELECT adresse_mail, mot_de_passe FROM member WHERE adresse_mail = 'self.adress'").unwrap();
-    let mut res = "".to_string();
-
-    for row in stmt.query(&[]).unwrap() {
-        let person = Member {
-            nom: row.get(0),
-            prenom: row.get(1),
-            date_naissance: row.get(2),
-            numero_tel: row.get(3),
-            adresse_mail: row.get(4),
-            mot_de_passe: row.get(5),
-            confirmation_mp: row.get(6),
-            adresse: row.get(7),
-        };
-
-        res = format!("form : {}\n{}, {}",
-                      res, person.adresse_mail, person.mot_de_passe);
-
-    };
-
-    res
-}
 
 
 #[get("/api/member")]
@@ -391,6 +357,46 @@ pub fn member() -> String {
     json_member_list = format!("{}\n]", json_member_list);
 //res
     //return the member list as a json Value
+
+    json_member_list
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Login {
+    adresse_mail: String,
+    mot_de_passe: String,
+}
+
+#[post("/api/login_member", data="<json>")]
+pub fn login_member(json : String) -> String {
+    info!("json............: {}", json.as_str());
+    let login : Login = serde_json::from_str(json.as_str()).unwrap();
+
+    let conn = cnx().unwrap();
+
+    let mut res = "".to_string();
+    let mut json_member_list = "[\n".to_string();
+
+    let stmt = conn.prepare("SELECT nom, prenom, date_naissance, numero_tel, adresse_mail, mot_de_passe, confirmation_mp, adresse FROM member WHERE adresse_mail=$1 AND mot_de_passe=$2").unwrap();
+    for row in &stmt.query(&[&login.adresse_mail, &login.mot_de_passe]).unwrap() {
+        let person = Member {
+            nom: row.get(0),
+            prenom: row.get(1),
+            date_naissance: row.get(2),
+            numero_tel: row.get(3),
+            adresse_mail: row.get(4),
+            mot_de_passe: row.get(5),
+            confirmation_mp: row.get(6),
+            adresse: row.get(7),
+        };
+        json_member_list = format!("{}{},", json_member_list, serde_json::to_string(&person).unwrap());
+        res = format!("form : {}\n{}, {}, {}, {}, {}, {}, {}, {}",
+                      res, person.nom, person.prenom, person.date_naissance, person.numero_tel, person.adresse_mail, person.mot_de_passe, person.confirmation_mp, person.adresse);
+    };
+    if json_member_list.as_str().chars().last() == Some(',') {
+        json_member_list.pop();
+    }
+    json_member_list = format!("{}\n]", json_member_list);
 
     json_member_list
 }
