@@ -266,7 +266,7 @@ pub fn new_order (json : String) -> String {
     for (key, value) in me.items.iter() {
         conn.execute("INSERT INTO cmd_prod (commande_id, produit_id, quantity)\
     VALUES ($1, $2, $3)",
-                     &[&key, &commande_id, &value]).unwrap();
+                     &[&commande_id, &key,  &value]).unwrap();
     };
     serde_json::to_string("ok").unwrap()
 
