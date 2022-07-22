@@ -2,7 +2,7 @@
 <project version="4">
   <component name="SqlDialectMappings">
     <file url="file://$PROJECT_DIR$/MCD/MCD.sql" dialect="PostgreSQL" />
-    <file url="file://$PROJECT_DIR$/MCD/create_subscribe.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/MCD/delete_subscribe.sql" dialect="GenericSQL" />
     <file url="file://$PROJECT_DIR$/MCD/update_produit_with_ingredients_prix.sql" dialect="PostgreSQL" />
     <file url="PROJECT" dialect="PostgreSQL" />
   </component>
